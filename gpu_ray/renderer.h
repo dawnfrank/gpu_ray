@@ -13,7 +13,7 @@ public:
 	Renderer();
 	~Renderer();
 
-	Window* OpenWindow(uint32_t size_x, uint32_t size_y, std::wstring name);
+	Window* OpenWindow(uint32_t size_x, uint32_t size_y, std::string name);
 
 	bool Run();
 

@@ -6,39 +6,45 @@
 
 #include "renderer.h"
 #include "Window.h"
-#include "mymath.h"
 
 extern "C" cudaError_t InitCuda(int w, int h, unsigned char** dev_bitmap);
 extern "C" cudaError_t CalculateCuda(int w, int h, unsigned char* dev_bitmap, unsigned char* host_bitmap);
 extern "C" void DeinitCuda(unsigned char* dev_bitmap);
 
-
 int main() {
 	const int x = 400;
 	const int y = 300;
-	HDC hdc;
+	const int image_size = x * y * 4;
+
 	Renderer render;
-	auto w = render.OpenWindow(x, y, TEXT("test"));
+	auto w = render.OpenWindow(x, y, "test");
 
-	unsigned char host_bitmap[x*y * 4];
-	unsigned char *dev_bitmap=nullptr;
-	cudaError_t cudaStatus;
+	double u,v;
+	unsigned char* dev_bitmap=nullptr;
+	unsigned char host_bitmap[image_size];
+	HDC hdc;
+	int r, g, b;
+	int pixel;
 
-	cudaStatus=InitCuda(x, y,&dev_bitmap);
+	InitCuda(x, y, &dev_bitmap);
 
 	while (render.Run()) {
 		hdc = BeginPaint(w->GetHandler(), &w->GetPainter());
 
 		CalculateCuda(x, y, dev_bitmap, host_bitmap);
 
-		/*
 		for (int j = 0; j != y; ++j) {
 			for (int i = 0; i != x; ++i) {
-				Vec3 pixel(double(i) / double(x), double(j) / double(y), 0.2);
-				SetPixel(hdc, i, j, RGB(int(pixel[0] * 255.99), int(pixel[1] * 255.99), int(pixel[2] * 255.99)));
+				pixel = i + x*j;
+
+				r = host_bitmap[pixel*4];
+				g = host_bitmap[pixel*4+1];
+				b = host_bitmap[pixel*4+2];
+
+				SetPixel(hdc, i, j, RGB(r, g, b));
 			}
 		}
-		*/
+		
 		EndPaint(w->GetHandler(), &w->GetPainter());
 	}
 

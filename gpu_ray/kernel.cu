@@ -1,29 +1,68 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
-extern "C" cudaError_t InitCuda(int w,int h,unsigned char** dev_bitmap);
-extern "C" cudaError_t CalculateCuda(int w, int h, unsigned char* dev_bitmap,unsigned char* host_bitmap);
+#include "mymath.cuh"
+#include "sphere.cuh"
+#include "ray.cuh"
+
+extern "C" cudaError_t InitCuda(int w, int h, unsigned char** dev_bitmap);
+extern "C" cudaError_t CalculateCuda(int w, int h, unsigned char* dev_bitmap, unsigned char* host_bitmap);
 extern "C" void DeinitCuda(unsigned char* dev_bitmap);
 
-__global__ void RayKernel(int w, int h,unsigned char* dev_bitmap)
+__device__ Vec3 color(Ray r, Sphere *dev_sp) {
+	return Vec3(1, 0, 0);
+
+}
+
+__global__ void RayKernel(int w, int h, unsigned char* dev_bitmap,Sphere *dev_sp)
 {
-	int i = blockIdx.x;
-	int j = blockIdx.y;
-	dev_bitmap[i * 4] = int(255.99*double(i)/double(w));
-	dev_bitmap[i * 4 + 1] = int(255.99*double(j) / double(w));
-	dev_bitmap[i * 4 + 2] = int(255.99*0.2);
-	dev_bitmap[i * 4 + 3] = 1;
+	int x = threadIdx.x + blockIdx.x*blockDim.x;
+	int y = threadIdx.y + blockIdx.y*blockDim.y;
+	
+	
+	if (x<w && y<h) {
+		int offset = x + y*w;
+
+		double u, v;
+		u = double(x) / double(w);
+		v = double(y) / double(h);
+
+		Vec3 lower_left_corner(-2.0, -1.5, -1.0);
+		Vec3 horizontal(4.0, 0.0, 0.0);
+		Vec3 vertical(0.0, 3.0, 0.0);
+		Vec3 origin(0.0, 0.0, 0.0);
+
+//		Ray r(origin, lower_left_corner + horizontal*u + vertical*v);
+//		Vec3 pixel = color(r, dev_sp);
+		
+		dev_bitmap[offset * 4] = int(255.99*u);
+		dev_bitmap[offset * 4 + 1] = int(255.99*v);
+		dev_bitmap[offset * 4 + 2] = int(255.99*0.2);
+		dev_bitmap[offset * 4 + 3] = 1;
+	}
 }
 
 cudaError_t CalculateCuda(int w, int h, unsigned char* dev_bitmap, unsigned char* host_bitmap) {
 	cudaError_t cudaStatus;
 	int image_size = w * h * 4;
 
+	Sphere *sp1 = (Sphere *)malloc(sizeof(Sphere));
+	sp1->radius = 0.5;
+	sp1->center.x = 0;
+	sp1->center.y = 0;
+	sp1->center.z = -1;
+	
+	Sphere *dev_sp=nullptr;
+	cudaMalloc((void**)dev_sp, sizeof(Sphere));
+	cudaMemcpy(dev_sp, sp1, image_size, cudaMemcpyHostToDevice);
+
 	// Launch a kernel on the GPU with one thread for each element.
-	dim3 grid(w, h);
-	RayKernel << <grid, 1 >> >(w,h,dev_bitmap);
+	dim3 grids((w+31)/32, (h+31)/32);
+	dim3 threads(32, 32);
+	RayKernel << <grids, threads >> >(w, h,dev_bitmap, dev_sp);
 
 	// Check for any errors launching the kernel
 	cudaStatus = cudaGetLastError();

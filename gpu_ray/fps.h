@@ -15,7 +15,7 @@ public:
 			std::cout << "FPS:" << _fps << std::endl;
 		}
 
-		std::cout << "Time: " << clock() - _last_clock << "ms" << std::endl;
+		std::cout << "Time: " << clock() - _last_clock << "ms" <<std::endl;
 		_last_clock = clock();
 	};
 private:

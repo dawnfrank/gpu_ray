@@ -4,7 +4,7 @@
 #include "Window.h"
 #include "renderer.h"
 
-Window::Window(Renderer * renderer, uint32_t size_x, uint32_t size_y, std::wstring name)
+Window::Window(Renderer * renderer, uint32_t size_x, uint32_t size_y, std::string name)
 {
 	_renderer = renderer;
 	_surface_size_x = size_x;
@@ -55,7 +55,7 @@ void Window::_InitOSWindow() {
 	assert(_surface_size_y > 0);
 
 	_win32_instance = GetModuleHandle(nullptr);
-	_win32_class_name = _window_name + TEXT("_") + std::to_wstring(_win32_class_id_counter);
+	_win32_class_name = _window_name + "_" + std::to_string(_win32_class_id_counter);
 	_win32_class_id_counter++;
 
 	//Initlize the window class structure
