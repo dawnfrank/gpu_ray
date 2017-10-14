@@ -15,6 +15,9 @@ public:
 };
 
 __device__ bool Sphere::hit(const Ray& r, double t_min, double t_max, hit_record& rec) const {
+	double t = 0.5*(r.direction.y + 1.0);
+	return Vec3(1.0, 1.0, 1.0)*(1.0 - t) + Vec3(0.5, 0.7, 1.0)*t;
+
 	Vec3 oc = r.origin - center;
 	double a = r.direction*r.direction;
 	double b = oc*r.direction;

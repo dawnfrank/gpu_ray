@@ -19,7 +19,6 @@ int main() {
 	Renderer render;
 	auto w = render.OpenWindow(x, y, "test");
 
-	double u,v;
 	unsigned char* dev_bitmap=nullptr;
 	unsigned char host_bitmap[image_size];
 	HDC hdc;
@@ -35,7 +34,7 @@ int main() {
 
 		for (int j = 0; j != y; ++j) {
 			for (int i = 0; i != x; ++i) {
-				pixel = i + x*j;
+				pixel = i + x*(y-j-1);
 
 				r = host_bitmap[pixel*4];
 				g = host_bitmap[pixel*4+1];
