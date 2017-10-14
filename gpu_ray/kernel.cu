@@ -14,10 +14,10 @@ extern "C" cudaError_t CalculateCuda(int w, int h, unsigned char* dev_bitmap, un
 extern "C" void DeinitCuda(unsigned char* dev_bitmap);
 
 __device__ Vec3 color(Ray &r, Sphere *dev_sp) {
-//	hit_record rec;
-//	if (dev_sp->hit(r, 0.001, DBL_MAX, rec)) {
-//		return 0.5*Vec3(rec.normal.x + 1, rec.normal.y + 1, rec.normal.z + 1);
-//	}
+	hit_record rec;
+	if (dev_sp->hit(r, 0.001, DBL_MAX, rec)) {
+		return 0.5*Vec3(rec.normal.x + 1, rec.normal.y + 1, rec.normal.z + 1);
+	}
 	double t = 0.5*(r.direction.y + 1.0);
 	return Vec3(1.0, 1.0, 1.0)*(1.0 - t) + Vec3(0.5, 0.7, 1.0)*t;
 }

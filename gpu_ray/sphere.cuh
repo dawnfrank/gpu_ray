@@ -8,16 +8,14 @@ public:
 	__device__ Sphere() {}
 	__device__ Sphere(Vec3 cen, double r) : center(cen), radius(r) {};
 
-	__device__ bool hit(const Ray& r, double tmin, double tmax, hit_record& rec) const;
+	__device__ bool hit(const Ray& r, double t_min, double t_max, hit_record& rec) const;
 
 	Vec3 center;
 	double radius;
 };
 
-__device__ bool Sphere::hit(const Ray& r, double t_min, double t_max, hit_record& rec) const {
-	double t = 0.5*(r.direction.y + 1.0);
-	return Vec3(1.0, 1.0, 1.0)*(1.0 - t) + Vec3(0.5, 0.7, 1.0)*t;
 
+__device__ bool Sphere::hit(const Ray& r, double t_min, double t_max, hit_record& rec) const {
 	Vec3 oc = r.origin - center;
 	double a = r.direction*r.direction;
 	double b = oc*r.direction;
